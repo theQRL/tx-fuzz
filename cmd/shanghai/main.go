@@ -2,13 +2,12 @@ package main
 
 import (
 	"context"
-	"crypto/ecdsa"
 	"encoding/binary"
 	"fmt"
 
+	"github.com/theQRL/go-qrllib/dilithium"
 	"github.com/theQRL/go-zond/common"
 	"github.com/theQRL/go-zond/core/types"
-	"github.com/theQRL/go-zond/crypto"
 	"github.com/theQRL/go-zond/rpc"
 	"github.com/theQRL/go-zond/zondclient"
 	txfuzz "github.com/theQRL/tx-fuzz"
@@ -77,7 +76,7 @@ func main() {
 }
 
 func exec(data []byte) {
-	cl, sk := getRealBackend()
+	cl, acc := getRealBackend()
 	backend := zondclient.NewClient(cl)
 	sender := common.HexToAddress(txfuzz.ADDR)
 	nonce, err := backend.PendingNonceAt(context.Background(), sender)
@@ -91,7 +90,7 @@ func exec(data []byte) {
 	fmt.Printf("Nonce: %v\n", nonce)
 	gp, _ := backend.SuggestGasPrice(context.Background())
 	tx := types.NewContractCreation(nonce, common.Big1, 500000, gp.Mul(gp, common.Big2), data)
-	signedTx, _ := types.SignTx(tx, types.NewLondonSigner(chainid), sk)
+	signedTx, _ := types.SignTx(tx, types.NewLondonSigner(chainid), acc)
 	backend.SendTransaction(context.Background(), signedTx)
 }
 
@@ -112,16 +111,20 @@ func repeatOpcode(size int, opcode byte) []byte {
 	return initcode
 }
 
-func getRealBackend() (*rpc.Client, *ecdsa.PrivateKey) {
+func getRealBackend() (*rpc.Client, *dilithium.Dilithium) {
 	// eth.sendTransaction({from:personal.listAccounts[0], to:"0xb02A2EdA1b317FBd16760128836B0Ac59B560e9D", value: "100000000000000"})
 
-	sk := crypto.ToECDSAUnsafe(common.FromHex(txfuzz.SK))
-	if crypto.PubkeyToAddress(sk.PublicKey).Hex() != txfuzz.ADDR {
-		panic(fmt.Sprintf("wrong address want %s got %s", crypto.PubkeyToAddress(sk.PublicKey).Hex(), txfuzz.ADDR))
+	acc, err := dilithium.NewDilithiumFromHexSeed(txfuzz.SEED[2:])
+	if err != nil {
+		panic(err)
 	}
+	if addr := common.Address(acc.GetAddress()); addr.Hex() != txfuzz.ADDR {
+		panic(fmt.Sprintf("wrong address want %s got %s", addr.Hex(), txfuzz.ADDR))
+	}
+
 	cl, err := rpc.Dial(address)
 	if err != nil {
 		panic(err)
 	}
-	return cl, sk
+	return cl, acc
 }

@@ -6,10 +6,10 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/theQRL/go-qrllib/dilithium"
 	"github.com/theQRL/go-zond/accounts/abi/bind"
 	"github.com/theQRL/go-zond/common"
 	"github.com/theQRL/go-zond/core/types"
-	"github.com/theQRL/go-zond/crypto"
 	"github.com/theQRL/go-zond/zondclient"
 )
 
@@ -119,27 +119,18 @@ var (
 )
 
 func CreateAddresses(N int) ([]string, []string) {
-	keys := make([]string, 0, N)
+	seeds := make([]string, 0, N)
 	addrs := make([]string, 0, N)
 
 	for i := 0; i < N; i++ {
-		// WARNING= USES UNSECURE RANDOMNESS
-		sk, err := crypto.GenerateKey()
+		acc, err := dilithium.New()
 		if err != nil {
 			panic(err)
 		}
-		addr := crypto.PubkeyToAddress(sk.PublicKey)
-		skHex := "0x" + common.Bytes2Hex(crypto.FromECDSA(sk))
-		// Sanity check marshalling
-		skTest, err := crypto.ToECDSA(crypto.FromECDSA(sk))
-		if err != nil {
-			panic(err)
-		}
-		_ = skTest
-		keys = append(keys, skHex)
-		addrs = append(addrs, addr.Hex())
+		seeds = append(seeds, acc.GetHexSeed())
+		addrs = append(addrs, common.Address(acc.GetAddress()).Hex())
 	}
-	return keys, addrs
+	return seeds, addrs
 }
 
 func Airdrop(config *Config, value *big.Int) error {

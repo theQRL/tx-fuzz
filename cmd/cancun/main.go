@@ -14,9 +14,7 @@ import (
 	"github.com/theQRL/go-zond/common"
 	"github.com/theQRL/go-zond/common/hexutil"
 	"github.com/theQRL/go-zond/core/types"
-	"github.com/theQRL/go-zond/crypto"
 	"github.com/theQRL/go-zond/crypto/kzg4844"
-	"github.com/theQRL/go-zond/params"
 	"github.com/theQRL/go-zond/rpc"
 	"github.com/theQRL/go-zond/zondclient"
 	txfuzz "github.com/theQRL/tx-fuzz"
@@ -288,11 +286,13 @@ func encodeBlobs(data []byte) []kzg4844.Blob {
 	fieldIndex := -1
 	for i := 0; i < len(data); i += 31 {
 		fieldIndex++
-		if fieldIndex == params.BlobTxFieldElementsPerBlob {
-			blobs = append(blobs, kzg4844.Blob{})
-			blobIndex++
-			fieldIndex = 0
-		}
+		/*
+			if fieldIndex == params.BlobTxFieldElementsPerBlob {
+				blobs = append(blobs, kzg4844.Blob{})
+				blobIndex++
+				fieldIndex = 0
+			}
+		*/
 		max := i + 31
 		if max > len(data) {
 			max = len(data)
@@ -311,7 +311,7 @@ func kZGToVersionedHash(kzg kzg4844.Commitment) common.Hash {
 }
 
 func exec(addr common.Address, data []byte, blobs bool) *types.Transaction {
-	cl, sk := getRealBackend()
+	cl, acc := getRealBackend()
 	backend := zondclient.NewClient(cl)
 	sender := common.HexToAddress(txfuzz.ADDR)
 	nonce, err := backend.PendingNonceAt(context.Background(), sender)
@@ -341,7 +341,7 @@ func exec(addr common.Address, data []byte, blobs bool) *types.Transaction {
 		}
 		//nonce = nonce - 2
 		tx := txfuzz.New4844Tx(nonce, &addr, 500000, chainid, tip.Mul(tip, common.Big1), gp.Mul(gp, common.Big1), common.Big0, data, big.NewInt(1_000_000), blob, make(types.AccessList, 0))
-		signedTx, _ := types.SignTx(tx, types.NewCancunSigner(chainid), sk)
+		signedTx, _ := types.SignTx(tx, types.NewCancunSigner(chainid), acc)
 		rlpData, err = signedTx.MarshalBinary()
 		if err != nil {
 			panic(err)
@@ -349,7 +349,7 @@ func exec(addr common.Address, data []byte, blobs bool) *types.Transaction {
 		_tx = signedTx
 	} else {
 		tx := types.NewTx(&types.DynamicFeeTx{ChainID: chainid, Nonce: nonce, GasTipCap: tip, GasFeeCap: gp, Gas: 500000, To: &addr, Data: data})
-		signedTx, _ := types.SignTx(tx, types.NewCancunSigner(chainid), sk)
+		signedTx, _ := types.SignTx(tx, types.NewCancunSigner(chainid), acc)
 		rlpData, err = signedTx.MarshalBinary()
 		if err != nil {
 			panic(err)
@@ -366,15 +366,18 @@ func exec(addr common.Address, data []byte, blobs bool) *types.Transaction {
 func getRealBackend() (*rpc.Client, *dilithium.Dilithium) {
 	// eth.sendTransaction({from:personal.listAccounts[0], to:"0xb02A2EdA1b317FBd16760128836B0Ac59B560e9D", value: "100000000000000"})
 
-	sk := crypto.ToECDSAUnsafe(common.FromHex(txfuzz.SEED[2:]))
-	if crypto.PubkeyToAddress(sk.PublicKey).Hex() != txfuzz.ADDR {
-		panic(fmt.Sprintf("wrong address want %s got %s", crypto.PubkeyToAddress(sk.PublicKey).Hex(), txfuzz.ADDR))
+	acc, err := dilithium.NewDilithiumFromHexSeed(txfuzz.SEED[2:])
+	if err != nil {
+		panic(err)
+	}
+	if addr := common.Address(acc.GetAddress()); addr.Hex() != txfuzz.ADDR {
+		panic(fmt.Sprintf("wrong address want %s got %s", addr.Hex(), txfuzz.ADDR))
 	}
 	cl, err := rpc.Dial(address)
 	if err != nil {
 		panic(err)
 	}
-	return cl, sk
+	return cl, acc
 }
 
 func randomBlobData() ([]byte, error) {
@@ -457,7 +460,7 @@ func deploy4788Proxy() (common.Address, error) {
 }
 
 func deploy(bytecode string) (common.Address, error) {
-	cl, sk := getRealBackend()
+	cl, acc := getRealBackend()
 	backend := zondclient.NewClient(cl)
 	sender := common.HexToAddress(txfuzz.ADDR)
 	nonce, err := backend.PendingNonceAt(context.Background(), sender)
@@ -471,7 +474,7 @@ func deploy(bytecode string) (common.Address, error) {
 	fmt.Printf("Nonce: %v\n", nonce)
 	gp, _ := backend.SuggestGasPrice(context.Background())
 	tx := types.NewContractCreation(nonce, common.Big0, 500000, gp.Mul(gp, common.Big2), common.Hex2Bytes(bytecode))
-	signedTx, _ := types.SignTx(tx, types.NewLondonSigner(chainid), sk)
+	signedTx, _ := types.SignTx(tx, types.NewLondonSigner(chainid), acc)
 	if err := backend.SendTransaction(context.Background(), signedTx); err != nil {
 		return common.Address{}, err
 	}
@@ -479,7 +482,7 @@ func deploy(bytecode string) (common.Address, error) {
 }
 
 func execute(data []byte, gaslimit uint64) {
-	cl, sk := getRealBackend()
+	cl, acc := getRealBackend()
 	backend := zondclient.NewClient(cl)
 	sender := common.HexToAddress(txfuzz.ADDR)
 	nonce, err := backend.PendingNonceAt(context.Background(), sender)
@@ -493,7 +496,7 @@ func execute(data []byte, gaslimit uint64) {
 	fmt.Printf("Nonce: %v\n", nonce)
 	gp, _ := backend.SuggestGasPrice(context.Background())
 	tx := types.NewContractCreation(nonce, common.Big1, gaslimit, gp.Mul(gp, common.Big2), data)
-	signedTx, _ := types.SignTx(tx, types.NewLondonSigner(chainid), sk)
+	signedTx, _ := types.SignTx(tx, types.NewLondonSigner(chainid), acc)
 	backend.SendTransaction(context.Background(), signedTx)
 }
 

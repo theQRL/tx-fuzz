@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/MariusVanDerWijden/FuzzyVM v0.0.0-20230606141057-24202385e744
 	github.com/holiman/goevmlab v0.0.0-20230917164918-f3777d0b880b
+	github.com/theQRL/go-qrllib v0.0.0-20230406170304-b7eb19c367e1
 	github.com/theQRL/go-zond v0.0.0-20231027140652-1a949177601e
 	github.com/urfave/cli/v2 v2.25.7
 )
@@ -13,7 +14,6 @@ require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 // indirect
 	github.com/ethereum/go-ethereum v1.13.5-0.20231022140504-a6a0ae45b69a // indirect
-	github.com/theQRL/go-qrllib v0.0.0-20230406170304-b7eb19c367e1 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/tools v0.13.0 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect

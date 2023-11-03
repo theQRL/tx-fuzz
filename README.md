@@ -22,14 +22,3 @@ Run livefuzzer.
 ```
 ./livefuzzer spam
 ```
-
-tx-fuzz allows for an optional seed parameter to get reproducible fuzz transactions
-
-## Advanced usage
-You can optionally specify a seed parameter or a secret key to use as a faucet
-
-```
-./livefuzzer spam --seed <seed> --sk <SK>
-```
-
-You can set the RPC to use with `--rpc <RPC>`.

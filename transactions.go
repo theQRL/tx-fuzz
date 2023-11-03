@@ -107,20 +107,22 @@ func RandomBlobTx(rpc *rpc.Client, f *filler.Filler, sender common.Address, nonc
 
 type txCreationStrategy func(conf *txConf) (*types.Transaction, error)
 
+// NOTE(rgeraldes24) - kept just the dynamic fee tx for now
 var noAlStrategies = []txCreationStrategy{
-	legacyContractCreation,
-	legacyTx,
-	emptyAlContractCreation,
-	emptyAlTx,
+	//legacyContractCreation,
+	//legacyTx,
+	//emptyAlContractCreation,
+	//emptyAlTx,
 	contractCreation1559,
 	tx1559,
 }
 
+// NOTE(rgeraldes24) - kept just the dynamic fee tx for now
 var alStrategies = append(noAlStrategies, []txCreationStrategy{
 	fullAl1559ContractCreation,
 	fullAl1559Tx,
-	fullAlContractCreation,
-	fullAlTx,
+	//fullAlContractCreation,
+	//fullAlTx,
 }...)
 
 func legacyContractCreation(conf *txConf) (*types.Transaction, error) {
