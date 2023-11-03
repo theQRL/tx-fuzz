@@ -313,7 +313,6 @@ func encodeBlobs(data []byte) []kzg4844.Blob {
 	fieldIndex := -1
 	for i := 0; i < len(data); i += 31 {
 		fieldIndex++
-		// @TODO(rgeraldes24)
 		/*
 			if fieldIndex == params.BlobTxFieldElementsPerBlob {
 				blobs = append(blobs, kzg4844.Blob{})
