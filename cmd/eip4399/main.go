@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	txfuzz "github.com/rgeraldes24/tx-fuzz"
 	"github.com/theQRL/go-qrllib/dilithium"
 	"github.com/theQRL/go-zond/common"
 	"github.com/theQRL/go-zond/core/types"
 	"github.com/theQRL/go-zond/rpc"
 	"github.com/theQRL/go-zond/zondclient"
-	txfuzz "github.com/theQRL/tx-fuzz"
 )
 
 var (

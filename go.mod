@@ -1,4 +1,4 @@
-module github.com/theQRL/tx-fuzz
+module github.com/rgeraldes24/tx-fuzz
 
 go 1.20
 

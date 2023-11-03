@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/rgeraldes24/tx-fuzz/flags"
+	"github.com/rgeraldes24/tx-fuzz/spammer"
 	"github.com/theQRL/go-zond/params"
-	"github.com/theQRL/tx-fuzz/flags"
-	"github.com/theQRL/tx-fuzz/spammer"
 	"github.com/urfave/cli/v2"
 )
 

@@ -9,6 +9,7 @@ import (
 	"math/big"
 	"time"
 
+	txfuzz "github.com/rgeraldes24/tx-fuzz"
 	"github.com/theQRL/go-qrllib/dilithium"
 	"github.com/theQRL/go-zond/accounts/abi/bind"
 	"github.com/theQRL/go-zond/common"
@@ -17,7 +18,6 @@ import (
 	"github.com/theQRL/go-zond/crypto/kzg4844"
 	"github.com/theQRL/go-zond/rpc"
 	"github.com/theQRL/go-zond/zondclient"
-	txfuzz "github.com/theQRL/tx-fuzz"
 )
 
 const (
