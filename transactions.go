@@ -2,16 +2,13 @@ package txfuzz
 
 import (
 	"context"
-	"crypto/sha256"
 	"math/big"
 	"math/rand"
 
 	"github.com/MariusVanDerWijden/FuzzyVM/filler"
 	"github.com/MariusVanDerWijden/FuzzyVM/generator"
-	"github.com/holiman/uint256"
 	"github.com/theQRL/go-zond/common"
 	"github.com/theQRL/go-zond/core/types"
-	"github.com/theQRL/go-zond/crypto/kzg4844"
 	"github.com/theQRL/go-zond/params"
 	"github.com/theQRL/go-zond/rpc"
 	"github.com/theQRL/go-zond/zondclient"
@@ -96,54 +93,17 @@ func RandomValidTx(rpc *rpc.Client, f *filler.Filler, sender common.Address, non
 	}
 }
 
-func RandomBlobTx(rpc *rpc.Client, f *filler.Filler, sender common.Address, nonce uint64, gasPrice, chainID *big.Int, al bool) (*types.Transaction, error) {
-	conf := initDefaultTxConf(rpc, f, sender, nonce, gasPrice, chainID)
-	if al {
-		return fullAlBlobTx(conf)
-	} else {
-		return emptyAlBlobTx(conf)
-	}
-}
-
 type txCreationStrategy func(conf *txConf) (*types.Transaction, error)
 
-// NOTE(rgeraldes24) - kept just the dynamic fee tx for now
 var noAlStrategies = []txCreationStrategy{
-	//legacyContractCreation,
-	//legacyTx,
-	//emptyAlContractCreation,
-	//emptyAlTx,
 	contractCreation1559,
 	tx1559,
 }
 
-// NOTE(rgeraldes24) - kept just the dynamic fee tx for now
 var alStrategies = append(noAlStrategies, []txCreationStrategy{
 	fullAl1559ContractCreation,
 	fullAl1559Tx,
-	//fullAlContractCreation,
-	//fullAlTx,
 }...)
-
-func legacyContractCreation(conf *txConf) (*types.Transaction, error) {
-	// Legacy contract creation
-	return types.NewContractCreation(conf.nonce, conf.value, conf.gasLimit, conf.gasPrice, conf.code), nil
-}
-
-func legacyTx(conf *txConf) (*types.Transaction, error) {
-	// Legacy transaction
-	return types.NewTransaction(conf.nonce, *conf.to, conf.value, conf.gasLimit, conf.gasPrice, conf.code), nil
-}
-
-func emptyAlContractCreation(conf *txConf) (*types.Transaction, error) {
-	// AccessList contract creation
-	return newALTx(conf.nonce, nil, conf.gasLimit, conf.chainID, conf.gasPrice, conf.value, conf.code, make(types.AccessList, 0)), nil
-}
-
-func emptyAlTx(conf *txConf) (*types.Transaction, error) {
-	// AccessList transaction
-	return newALTx(conf.nonce, conf.to, conf.gasLimit, conf.chainID, conf.gasPrice, conf.value, conf.code, make(types.AccessList, 0)), nil
-}
 
 func contractCreation1559(conf *txConf) (*types.Transaction, error) {
 	// 1559 contract creation
@@ -161,26 +121,6 @@ func tx1559(conf *txConf) (*types.Transaction, error) {
 		return nil, err
 	}
 	return new1559Tx(conf.nonce, conf.to, conf.gasLimit, conf.chainID, tip, feecap, conf.value, conf.code, make(types.AccessList, 0)), nil
-}
-
-func fullAlContractCreation(conf *txConf) (*types.Transaction, error) {
-	// AccessList contract creation with AL
-	tx := types.NewContractCreation(conf.nonce, conf.value, conf.gasLimit, conf.gasPrice, conf.code)
-	al, err := CreateAccessList(conf.rpc, tx, conf.sender)
-	if err != nil {
-		return nil, err
-	}
-	return newALTx(conf.nonce, nil, conf.gasLimit, conf.chainID, conf.gasPrice, conf.value, conf.code, *al), nil
-}
-
-func fullAlTx(conf *txConf) (*types.Transaction, error) {
-	// AccessList transaction with AL
-	tx := types.NewTransaction(conf.nonce, *conf.to, conf.value, conf.gasLimit, conf.gasPrice, conf.code)
-	al, err := CreateAccessList(conf.rpc, tx, conf.sender)
-	if err != nil {
-		return nil, err
-	}
-	return newALTx(conf.nonce, conf.to, conf.gasLimit, conf.chainID, conf.gasPrice, conf.value, conf.code, *al), nil
 }
 
 func fullAl1559ContractCreation(conf *txConf) (*types.Transaction, error) {
@@ -211,50 +151,6 @@ func fullAl1559Tx(conf *txConf) (*types.Transaction, error) {
 	return new1559Tx(conf.nonce, conf.to, conf.gasLimit, conf.chainID, tip, feecap, conf.value, conf.code, *al), nil
 }
 
-func emptyAlBlobTx(conf *txConf) (*types.Transaction, error) {
-	// 4844 transaction without AL
-	tip, feecap, err := getCaps(conf.rpc, conf.gasPrice)
-	if err != nil {
-		return nil, err
-	}
-	data, err := randomBlobData()
-	if err != nil {
-		return nil, err
-	}
-	return New4844Tx(conf.nonce, conf.to, conf.gasLimit, conf.chainID, tip, feecap, conf.value, conf.code, big.NewInt(1000000), data, make(types.AccessList, 0)), nil
-}
-
-func fullAlBlobTx(conf *txConf) (*types.Transaction, error) {
-	// 4844 transaction with AL
-	tx := types.NewTransaction(conf.nonce, *conf.to, conf.value, conf.gasLimit, conf.gasPrice, conf.code)
-	al, err := CreateAccessList(conf.rpc, tx, conf.sender)
-	if err != nil {
-		return nil, err
-	}
-	tip, feecap, err := getCaps(conf.rpc, conf.gasPrice)
-	if err != nil {
-		return nil, err
-	}
-	data, err := randomBlobData()
-	if err != nil {
-		return nil, err
-	}
-	return New4844Tx(conf.nonce, conf.to, conf.gasLimit, conf.chainID, tip, feecap, conf.value, conf.code, big.NewInt(1000000), data, *al), nil
-}
-
-func newALTx(nonce uint64, to *common.Address, gasLimit uint64, chainID, gasPrice, value *big.Int, code []byte, al types.AccessList) *types.Transaction {
-	return types.NewTx(&types.AccessListTx{
-		ChainID:    chainID,
-		Nonce:      nonce,
-		GasPrice:   gasPrice,
-		Gas:        gasLimit,
-		To:         to,
-		Value:      value,
-		Data:       code,
-		AccessList: al,
-	})
-}
-
 func new1559Tx(nonce uint64, to *common.Address, gasLimit uint64, chainID, tip, feeCap, value *big.Int, code []byte, al types.AccessList) *types.Transaction {
 	return types.NewTx(&types.DynamicFeeTx{
 		ChainID:    chainID,
@@ -266,26 +162,6 @@ func new1559Tx(nonce uint64, to *common.Address, gasLimit uint64, chainID, tip, 
 		Value:      value,
 		Data:       code,
 		AccessList: al,
-	})
-}
-
-func New4844Tx(nonce uint64, to *common.Address, gasLimit uint64, chainID, tip, feeCap, value *big.Int, code []byte, blobFeeCap *big.Int, blobData []byte, al types.AccessList) *types.Transaction {
-	_, _, _, versionedHashes, err := EncodeBlobs(blobData)
-	if err != nil {
-		panic(err)
-	}
-	return types.NewTx(&types.BlobTx{
-		ChainID:    uint256.MustFromBig(chainID),
-		Nonce:      nonce,
-		GasTipCap:  uint256.MustFromBig(tip),
-		GasFeeCap:  uint256.MustFromBig(feeCap),
-		Gas:        gasLimit,
-		To:         to,
-		Value:      uint256.MustFromBig(value),
-		Data:       code,
-		AccessList: al,
-		BlobFeeCap: uint256.MustFromBig(blobFeeCap),
-		BlobHashes: versionedHashes,
 	})
 }
 
@@ -305,61 +181,4 @@ func getCaps(rpc *rpc.Client, defaultGasPrice *big.Int) (*big.Int, *big.Int, err
 	}
 	feeCap, err := client.SuggestGasPrice(context.Background())
 	return tip, feeCap, err
-}
-
-func encodeBlobs(data []byte) []kzg4844.Blob {
-	blobs := []kzg4844.Blob{{}}
-	blobIndex := 0
-	fieldIndex := -1
-	for i := 0; i < len(data); i += 31 {
-		fieldIndex++
-		/*
-			if fieldIndex == params.BlobTxFieldElementsPerBlob {
-				blobs = append(blobs, kzg4844.Blob{})
-				blobIndex++
-				fieldIndex = 0
-			}
-		*/
-		max := i + 31
-		if max > len(data) {
-			max = len(data)
-		}
-		copy(blobs[blobIndex][fieldIndex*32+1:], data[i:max])
-	}
-	return blobs
-}
-
-func EncodeBlobs(data []byte) ([]kzg4844.Blob, []kzg4844.Commitment, []kzg4844.Proof, []common.Hash, error) {
-	var (
-		blobs           = encodeBlobs(data)
-		commits         []kzg4844.Commitment
-		proofs          []kzg4844.Proof
-		versionedHashes []common.Hash
-	)
-	for _, blob := range blobs {
-		commit, err := kzg4844.BlobToCommitment(blob)
-		if err != nil {
-			return nil, nil, nil, nil, err
-		}
-		commits = append(commits, commit)
-
-		proof, err := kzg4844.ComputeBlobProof(blob, commit)
-		if err != nil {
-			return nil, nil, nil, nil, err
-		}
-		proofs = append(proofs, proof)
-
-		versionedHashes = append(versionedHashes, kZGToVersionedHash(commit))
-	}
-	return blobs, commits, proofs, versionedHashes, nil
-}
-
-var blobCommitmentVersionKZG uint8 = 0x01
-
-// kZGToVersionedHash implements kzg_to_versioned_hash from EIP-4844
-func kZGToVersionedHash(kzg kzg4844.Commitment) common.Hash {
-	h := sha256.Sum256(kzg[:])
-	h[0] = blobCommitmentVersionKZG
-
-	return h
 }

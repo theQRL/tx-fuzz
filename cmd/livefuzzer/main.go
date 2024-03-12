@@ -29,13 +29,6 @@ var spamCommand = &cli.Command{
 	Flags:  flags.SpamFlags,
 }
 
-var blobSpamCommand = &cli.Command{
-	Name:   "blobs",
-	Usage:  "Send blob spam transactions",
-	Action: runBlobSpam,
-	Flags:  flags.SpamFlags,
-}
-
 var createCommand = &cli.Command{
 	Name:   "create",
 	Usage:  "Create ephemeral accounts",
@@ -60,7 +53,6 @@ func initApp() *cli.App {
 	app.Commands = []*cli.Command{
 		airdropCommand,
 		spamCommand,
-		blobSpamCommand,
 		createCommand,
 		unstuckCommand,
 	}
@@ -107,16 +99,6 @@ func runBasicSpam(c *cli.Context) error {
 	}
 	airdropValue := new(big.Int).Mul(big.NewInt(int64((1+config.N)*1000000)), big.NewInt(params.GWei))
 	return spam(config, spammer.SendBasicTransactions, airdropValue)
-}
-
-func runBlobSpam(c *cli.Context) error {
-	config, err := spammer.NewConfigFromContext(c)
-	if err != nil {
-		return err
-	}
-	airdropValue := new(big.Int).Mul(big.NewInt(int64((1+config.N)*1000000)), big.NewInt(params.GWei))
-	airdropValue = airdropValue.Mul(airdropValue, big.NewInt(100))
-	return spam(config, spammer.SendBlobTransactions, airdropValue)
 }
 
 func runCreate(c *cli.Context) error {
