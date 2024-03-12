@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"sync"
 
-	"github.com/MariusVanDerWijden/FuzzyVM/filler"
+	"github.com/rgeraldes24/FuzzyVM/filler"
 	"github.com/theQRL/go-qrllib/dilithium"
 )
 
