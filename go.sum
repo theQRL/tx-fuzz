@@ -190,10 +190,10 @@ github.com/prysmaticlabs/fastssz v0.0.0-20221107182844-78142813af44 h1:c3p3UzV4v
 github.com/prysmaticlabs/fastssz v0.0.0-20221107182844-78142813af44/go.mod h1:MA5zShstUwCQaE9faGHgCGvEWUbG87p4SAXINhmCkvg=
 github.com/prysmaticlabs/gohashtree v0.0.3-alpha h1:1EVinCWdb3Lorq7xn8DYQHf48nCcdAM3Vb18KsFlRWY=
 github.com/prysmaticlabs/gohashtree v0.0.3-alpha/go.mod h1:4pWaT30XoEx1j8KNJf3TV+E3mQkaufn7mf+jRNb/Fuk=
-github.com/rgeraldes24/FuzzyVM v0.0.0-20240312135609-39cb5a24e4e6 h1:al7V2iHDJbz1WvW4PjrUA5Okj9UI0UkvFeXHqnTqRc0=
-github.com/rgeraldes24/FuzzyVM v0.0.0-20240312135609-39cb5a24e4e6/go.mod h1:pbJ6oV2QNm/fvZuzQhBAYaclZ16Np8K5UQoIGxEYXJQ=
-github.com/rgeraldes24/goevmlab v0.0.0-20240312135254-7ab191f8d459 h1:CqaBAEV8jTqOS2qlhv3EGIf8dQvdU3id14jLNzuzOhY=
-github.com/rgeraldes24/goevmlab v0.0.0-20240312135254-7ab191f8d459/go.mod h1:Xr1IpR09F6wx1qIrAFE6eQjE75PkEdxCxeTWSkZJtoc=
+github.com/rgeraldes24/FuzzyVM v0.0.0-20240409132327-bdda31292e1d h1:lMatejndxKUPXShISAb4GpvrCviTc5aMBQvn5raG7Ck=
+github.com/rgeraldes24/FuzzyVM v0.0.0-20240409132327-bdda31292e1d/go.mod h1:uHSw1M1Vm/DqFmy88f0Sp+III6Jl5xIFS88LSEZu4fM=
+github.com/rgeraldes24/goevmlab v0.0.0-20240405152946-c986fe335e98 h1:TDgYW0opYEw2El+dlO7RRhgD7IBaukIGRUeSI9ajszg=
+github.com/rgeraldes24/goevmlab v0.0.0-20240405152946-c986fe335e98/go.mod h1:Xi7ASMb4Y5b3sU4NOA7zudrx1AUwHg8qdVw8uTsAWgk=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.4.4 h1:8TfxU8dW6PdqD27gjM8MVNuicgxIjxpm4K7x4jp8sis=
 github.com/rivo/uniseg v0.4.4/go.mod h1:FN3SvrM+Zdj16jyLfmOkMNblXMcoc8DfTHruCPUcx88=

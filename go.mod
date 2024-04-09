@@ -6,7 +6,7 @@ toolchain go1.21.6
 
 require (
 	github.com/holiman/goevmlab v0.0.0-20230917164918-f3777d0b880b
-	github.com/rgeraldes24/FuzzyVM v0.0.0-20240312135609-39cb5a24e4e6
+	github.com/rgeraldes24/FuzzyVM v0.0.0-20240409132327-bdda31292e1d
 	github.com/theQRL/go-qrllib v0.0.0-20230406170304-b7eb19c367e1
 	github.com/theQRL/go-zond v0.1.1
 	github.com/urfave/cli/v2 v2.27.1
@@ -68,7 +68,7 @@ require (
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/prysmaticlabs/fastssz v0.0.0-20221107182844-78142813af44 // indirect
 	github.com/prysmaticlabs/gohashtree v0.0.3-alpha // indirect
-	github.com/rgeraldes24/goevmlab v0.0.0-20240312135254-7ab191f8d459 // indirect
+	github.com/rgeraldes24/goevmlab v0.0.0-20240405152946-c986fe335e98 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
