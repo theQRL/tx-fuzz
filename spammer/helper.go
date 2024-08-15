@@ -30,9 +30,18 @@ func sendTxWithNonce(d *dilithium.Dilithium, backend *zondclient.Client, to comm
 	if err != nil {
 		return nil, err
 	}
-	gp, _ := backend.SuggestGasPrice(context.Background())
-	tx := types.NewTransaction(nonce, to, value, 500000, gp.Mul(gp, big.NewInt(100)), nil)
-	signedTx, _ := types.SignTx(tx, types.NewEIP155Signer(chainid), d)
+	gasFeeCap, _ := backend.SuggestGasPrice(context.Background())
+	gasTipCap, _ := backend.SuggestGasTipCap(context.Background())
+	tx := types.NewTx(&types.DynamicFeeTx{
+		Nonce:     nonce,
+		To:        &to,
+		Value:     value,
+		Gas:       500000,
+		GasFeeCap: gasFeeCap,
+		GasTipCap: gasTipCap,
+		Data:      nil,
+	})
+	signedTx, _ := types.SignTx(tx, types.NewShanghaiSigner(chainid), d)
 	return signedTx, backend.SendTransaction(context.Background(), signedTx)
 }
 

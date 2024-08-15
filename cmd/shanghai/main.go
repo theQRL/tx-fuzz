@@ -88,9 +88,17 @@ func exec(data []byte) {
 		panic(err)
 	}
 	fmt.Printf("Nonce: %v\n", nonce)
-	gp, _ := backend.SuggestGasPrice(context.Background())
-	tx := types.NewContractCreation(nonce, common.Big1, 500000, gp.Mul(gp, common.Big2), data)
-	signedTx, _ := types.SignTx(tx, types.NewLondonSigner(chainid), acc)
+	gasFeeCap, _ := backend.SuggestGasPrice(context.Background())
+	gasTipCap, _ := backend.SuggestGasTipCap(context.Background())
+	tx := types.NewTx(&types.DynamicFeeTx{
+		Nonce:     nonce,
+		Value:     common.Big1,
+		Gas:       500000,
+		GasFeeCap: gasFeeCap,
+		GasTipCap: gasTipCap,
+		Data:      data,
+	})
+	signedTx, _ := types.SignTx(tx, types.NewShanghaiSigner(chainid), acc)
 	backend.SendTransaction(context.Background(), signedTx)
 }
 

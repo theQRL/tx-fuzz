@@ -148,9 +148,18 @@ func Airdrop(config *Config, value *big.Int) error {
 			fmt.Printf("error getting pending nonce; could not airdrop: %v\n", err)
 			return err
 		}
-		to := acc.GetAddress()
-		gp, _ := backend.SuggestGasPrice(context.Background())
-		tx2 := types.NewTransaction(nonce, to, value, 21000, gp, nil)
+		to := common.Address(acc.GetAddress())
+		gasFeeCap, _ := backend.SuggestGasPrice(context.Background())
+		gasTipCap, _ := backend.SuggestGasTipCap(context.Background())
+		tx2 := types.NewTx(&types.DynamicFeeTx{
+			Nonce:     nonce,
+			To:        &to,
+			Value:     value,
+			Gas:       21000,
+			GasFeeCap: gasFeeCap,
+			GasTipCap: gasTipCap,
+			Data:      nil,
+		})
 		signedTx, _ := types.SignTx(tx2, types.LatestSignerForChainID(chainid), config.faucetAcc)
 		if err := backend.SendTransaction(context.Background(), signedTx); err != nil {
 			fmt.Printf("error sending transaction; could not airdrop: %v\n", err)

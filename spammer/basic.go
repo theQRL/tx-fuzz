@@ -32,12 +32,12 @@ func SendBasicTransactions(config *Config, d *dilithium.Dilithium, f *filler.Fil
 		if err != nil {
 			return err
 		}
-		tx, err := txfuzz.RandomValidTx(config.backend, f, sender, nonce, nil, nil, config.accessList)
+		tx, err := txfuzz.RandomValidTx(config.backend, f, sender, nonce, nil, nil, nil, config.accessList)
 		if err != nil {
 			log.Warn("Could not create valid tx: %v", nonce)
 			return err
 		}
-		signedTx, err := types.SignTx(tx, types.NewCancunSigner(chainID), d)
+		signedTx, err := types.SignTx(tx, types.NewShanghaiSigner(chainID), d)
 		if err != nil {
 			return err
 		}

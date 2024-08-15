@@ -23,32 +23,40 @@ func RandomCode(f *filler.Filler) []byte {
 // RandomTx creates a random transaction.
 func RandomTx(f *filler.Filler) (*types.Transaction, error) {
 	nonce := uint64(rand.Int63())
-	gasPrice := big.NewInt(rand.Int63())
+	gasFeeCap := big.NewInt(rand.Int63())
+	gasTipCap := big.NewInt(rand.Int63())
 	chainID := big.NewInt(rand.Int63())
-	return RandomValidTx(nil, f, common.Address{}, nonce, gasPrice, chainID, false)
+	return RandomValidTx(nil, f, common.Address{}, nonce, gasFeeCap, gasTipCap, chainID, false)
 }
 
 type txConf struct {
-	rpc      *rpc.Client
-	nonce    uint64
-	sender   common.Address
-	to       *common.Address
-	value    *big.Int
-	gasLimit uint64
-	gasPrice *big.Int
-	chainID  *big.Int
-	code     []byte
+	rpc       *rpc.Client
+	nonce     uint64
+	sender    common.Address
+	to        *common.Address
+	value     *big.Int
+	gasLimit  uint64
+	gasFeeCap *big.Int
+	gasTipCap *big.Int
+	chainID   *big.Int
+	code      []byte
 }
 
-func initDefaultTxConf(rpc *rpc.Client, f *filler.Filler, sender common.Address, nonce uint64, gasPrice, chainID *big.Int) *txConf {
+func initDefaultTxConf(rpc *rpc.Client, f *filler.Filler, sender common.Address, nonce uint64, gasFeeCap, gasTipCap, chainID *big.Int) *txConf {
 	// Set fields if non-nil
 	if rpc != nil {
 		client := zondclient.NewClient(rpc)
 		var err error
-		if gasPrice == nil {
-			gasPrice, err = client.SuggestGasPrice(context.Background())
+		if gasFeeCap == nil {
+			gasFeeCap, err = client.SuggestGasPrice(context.Background())
 			if err != nil {
-				gasPrice = big.NewInt(1)
+				gasFeeCap = big.NewInt(1)
+			}
+		}
+		if gasTipCap == nil {
+			gasTipCap, err = client.SuggestGasTipCap(context.Background())
+			if err != nil {
+				gasTipCap = big.NewInt(1)
 			}
 		}
 		if chainID == nil {
@@ -66,15 +74,16 @@ func initDefaultTxConf(rpc *rpc.Client, f *filler.Filler, sender common.Address,
 		code = code[:128]
 	}
 	return &txConf{
-		rpc:      rpc,
-		nonce:    nonce,
-		sender:   sender,
-		to:       &to,
-		value:    value,
-		gasLimit: gas,
-		gasPrice: gasPrice,
-		chainID:  chainID,
-		code:     code,
+		rpc:       rpc,
+		nonce:     nonce,
+		sender:    sender,
+		to:        &to,
+		value:     value,
+		gasLimit:  gas,
+		gasFeeCap: gasFeeCap,
+		gasTipCap: gasTipCap,
+		chainID:   chainID,
+		code:      code,
 	}
 }
 
@@ -82,8 +91,8 @@ func initDefaultTxConf(rpc *rpc.Client, f *filler.Filler, sender common.Address,
 // It does not mean that the transaction will succeed, but that it is well-formed.
 // If gasPrice is not set, we will try to get it from the rpc
 // If chainID is not set, we will try to get it from the rpc
-func RandomValidTx(rpc *rpc.Client, f *filler.Filler, sender common.Address, nonce uint64, gasPrice, chainID *big.Int, al bool) (*types.Transaction, error) {
-	conf := initDefaultTxConf(rpc, f, sender, nonce, gasPrice, chainID)
+func RandomValidTx(rpc *rpc.Client, f *filler.Filler, sender common.Address, nonce uint64, gasFeeCap, gasTipCap, chainID *big.Int, al bool) (*types.Transaction, error) {
+	conf := initDefaultTxConf(rpc, f, sender, nonce, gasFeeCap, gasTipCap, chainID)
 	if al {
 		index := rand.Intn(len(alStrategies))
 		return alStrategies[index](conf)
@@ -107,7 +116,7 @@ var alStrategies = append(noAlStrategies, []txCreationStrategy{
 
 func contractCreation1559(conf *txConf) (*types.Transaction, error) {
 	// 1559 contract creation
-	tip, feecap, err := getCaps(conf.rpc, conf.gasPrice)
+	tip, feecap, err := getCaps(conf.rpc, conf.gasFeeCap)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +125,7 @@ func contractCreation1559(conf *txConf) (*types.Transaction, error) {
 
 func tx1559(conf *txConf) (*types.Transaction, error) {
 	// 1559 transaction
-	tip, feecap, err := getCaps(conf.rpc, conf.gasPrice)
+	tip, feecap, err := getCaps(conf.rpc, conf.gasFeeCap)
 	if err != nil {
 		return nil, err
 	}
@@ -125,12 +134,19 @@ func tx1559(conf *txConf) (*types.Transaction, error) {
 
 func fullAl1559ContractCreation(conf *txConf) (*types.Transaction, error) {
 	// 1559 contract creation with AL
-	tx := types.NewContractCreation(conf.nonce, conf.value, conf.gasLimit, conf.gasPrice, conf.code)
+	tx := types.NewTx(&types.DynamicFeeTx{
+		Nonce:     conf.nonce,
+		Value:     conf.value,
+		Gas:       conf.gasLimit,
+		GasFeeCap: conf.gasFeeCap,
+		GasTipCap: conf.gasTipCap,
+		Data:      conf.code,
+	})
 	al, err := CreateAccessList(conf.rpc, tx, conf.sender)
 	if err != nil {
 		return nil, err
 	}
-	tip, feecap, err := getCaps(conf.rpc, conf.gasPrice)
+	tip, feecap, err := getCaps(conf.rpc, conf.gasFeeCap)
 	if err != nil {
 		return nil, err
 	}
@@ -139,12 +155,20 @@ func fullAl1559ContractCreation(conf *txConf) (*types.Transaction, error) {
 
 func fullAl1559Tx(conf *txConf) (*types.Transaction, error) {
 	// 1559 tx with AL
-	tx := types.NewTransaction(conf.nonce, *conf.to, conf.value, conf.gasLimit, conf.gasPrice, conf.code)
+	tx := types.NewTx(&types.DynamicFeeTx{
+		Nonce:     conf.nonce,
+		To:        conf.to,
+		Value:     conf.value,
+		Gas:       conf.gasLimit,
+		GasFeeCap: conf.gasFeeCap,
+		GasTipCap: conf.gasTipCap,
+		Data:      conf.code,
+	})
 	al, err := CreateAccessList(conf.rpc, tx, conf.sender)
 	if err != nil {
 		return nil, err
 	}
-	tip, feecap, err := getCaps(conf.rpc, conf.gasPrice)
+	tip, feecap, err := getCaps(conf.rpc, conf.gasFeeCap)
 	if err != nil {
 		return nil, err
 	}
@@ -165,14 +189,14 @@ func new1559Tx(nonce uint64, to *common.Address, gasLimit uint64, chainID, tip, 
 	})
 }
 
-func getCaps(rpc *rpc.Client, defaultGasPrice *big.Int) (*big.Int, *big.Int, error) {
+func getCaps(rpc *rpc.Client, defaultGasFeeCap *big.Int) (*big.Int, *big.Int, error) {
 	if rpc == nil {
 		tip := new(big.Int).Mul(big.NewInt(1), big.NewInt(params.GWei))
-		if defaultGasPrice.Cmp(tip) >= 0 {
-			feeCap := new(big.Int).Sub(defaultGasPrice, tip)
+		if defaultGasFeeCap.Cmp(tip) >= 0 {
+			feeCap := new(big.Int).Sub(defaultGasFeeCap, tip)
 			return tip, feeCap, nil
 		}
-		return big.NewInt(0), defaultGasPrice, nil
+		return big.NewInt(0), defaultGasFeeCap, nil
 	}
 	client := zondclient.NewClient(rpc)
 	tip, err := client.SuggestGasTipCap(context.Background())

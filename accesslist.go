@@ -17,7 +17,6 @@ func CreateAccessList(client *rpc.Client, tx *types.Transaction, from common.Add
 		From:       from,
 		To:         tx.To(),
 		Gas:        tx.Gas(),
-		GasPrice:   tx.GasPrice(),
 		GasFeeCap:  tx.GasFeeCap(),
 		GasTipCap:  tx.GasTipCap(),
 		Value:      tx.Value(),

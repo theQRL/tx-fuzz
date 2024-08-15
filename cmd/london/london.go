@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/holiman/goevmlab/ops"
-	"github.com/holiman/goevmlab/program"
+	"github.com/rgeraldes24/goevmlab/ops"
+	"github.com/rgeraldes24/goevmlab/program"
 	"github.com/theQRL/go-zond/core/vm"
 )
 
