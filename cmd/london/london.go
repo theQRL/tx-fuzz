@@ -3,34 +3,7 @@ package main
 import (
 	"github.com/rgeraldes24/goevmlab/ops"
 	"github.com/rgeraldes24/goevmlab/program"
-	"github.com/theQRL/go-zond/core/vm"
 )
-
-func Selfdestructor() []byte {
-	selfdestructTo := []byte{
-		byte(vm.PUSH1),
-		0,
-		byte(vm.CALLDATALOAD),
-		byte(vm.PUSH20),
-		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-		byte(vm.AND),
-		byte(vm.SELFDESTRUCT),
-	}
-
-	initcode := program.NewProgram()
-	initcode.Mstore(selfdestructTo, 0)
-	initcode.Return(0, uint32(len(selfdestructTo)))
-
-	program := program.NewProgram()
-	Create(program, selfdestructTo, false, true)
-	program.Op(ops.POP)
-	Create(program, selfdestructTo, true, false)
-	program.Op(ops.POP)
-	Create(program, initcode.Bytecode(), true, false)
-	//program.CreateAndCall(initcode.Bytecode(), true, ops.STATICCALL)
-	//program.CreateAndCall(initcode.Bytecode(), true, ops.DELEGATECALL)
-	return program.Bytecode()
-}
 
 func EfByte() []byte {
 	inner := []byte{

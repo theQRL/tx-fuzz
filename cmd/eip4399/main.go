@@ -19,7 +19,10 @@ var (
 func main() {
 	cl, acc := getRealBackend()
 	backend := zondclient.NewClient(cl)
-	sender := common.HexToAddress(txfuzz.ADDR)
+	sender, err := common.NewAddressFromString(txfuzz.ADDR)
+	if err != nil {
+		panic(err)
+	}
 	nonce, err := backend.PendingNonceAt(context.Background(), sender)
 	if err != nil {
 		panic(err)
