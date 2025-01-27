@@ -170,6 +170,7 @@ github.com/rgeraldes24/FuzzyVM v0.0.0-20240814164600-5f611699efbc h1:MJkWGA0EPdr
 github.com/rgeraldes24/FuzzyVM v0.0.0-20240814164600-5f611699efbc/go.mod h1:6/edoP50Bzj0w40ed06pHfim0ZMjOX5XpnXUqBB8ECM=
 github.com/rgeraldes24/go-zond v0.0.0-20240814163510-4a969197d73d h1:COieWqurfq6hiUeVYk8V82fZd/LdhD65FJgd0/hPIfE=
 github.com/rgeraldes24/go-zond v0.0.0-20240814163510-4a969197d73d/go.mod h1:jwNlsc5Si4ZbUNjxfbuclRXjXwVDy7zPnyAUiSHnAMA=
+github.com/rgeraldes24/go-zond v0.0.0-20241227130350-b68064cef7bc/go.mod h1:N8aSiLnp1znLhurd3uf0j2tNFG8KgkKBWcTuEUS98n4=
 github.com/rgeraldes24/goevmlab v0.0.0-20240814164028-e72145bd7218 h1:3YzQ0V7kLCXEd6katIKPyHEXJW4d1EmfdiycZfRU3OM=
 github.com/rgeraldes24/goevmlab v0.0.0-20240814164028-e72145bd7218/go.mod h1:6LvhbNK80JDku+7sovmVx4dDAUNVXpQ8eohHlHMYBsE=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=

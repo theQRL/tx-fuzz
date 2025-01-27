@@ -1,8 +1,8 @@
 module github.com/rgeraldes24/tx-fuzz
 
-go 1.21
+go 1.22
 
-toolchain go1.21.6
+toolchain go1.22.6
 
 require (
 	github.com/rgeraldes24/FuzzyVM v0.0.0-20240814164600-5f611699efbc
@@ -81,4 +81,4 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/theQRL/go-zond => github.com/rgeraldes24/go-zond v0.0.0-20240814163510-4a969197d73d
+replace github.com/theQRL/go-zond => github.com/rgeraldes24/go-zond v0.0.0-20241227130350-b68064cef7bc

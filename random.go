@@ -33,7 +33,11 @@ func randomAddress() common.Address {
 	case 3:
 		return common.Address{}
 	case 4:
-		return common.HexToAddress(ADDR)
+		addr, err := common.NewAddressFromString(ADDR)
+		if err != nil {
+			panic(err)
+		}
+		return addr
 	}
 	return common.Address{}
 }
