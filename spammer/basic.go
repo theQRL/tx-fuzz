@@ -6,13 +6,13 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/rgeraldes24/FuzzyVM/filler"
-	txfuzz "github.com/rgeraldes24/tx-fuzz"
+	"github.com/theQRL/FuzzyVM/filler"
 	"github.com/theQRL/go-qrllib/dilithium"
 	"github.com/theQRL/go-zond/accounts/abi/bind"
 	"github.com/theQRL/go-zond/core/types"
 	"github.com/theQRL/go-zond/log"
 	"github.com/theQRL/go-zond/zondclient"
+	txfuzz "github.com/theQRL/tx-fuzz"
 )
 
 const TX_TIMEOUT = 5 * time.Minute

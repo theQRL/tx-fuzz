@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"math/rand"
 
-	"github.com/rgeraldes24/FuzzyVM/filler"
-	"github.com/rgeraldes24/FuzzyVM/generator"
+	"github.com/theQRL/FuzzyVM/filler"
+	"github.com/theQRL/FuzzyVM/generator"
 	"github.com/theQRL/go-zond/common"
 	"github.com/theQRL/go-zond/core/types"
 	"github.com/theQRL/go-zond/params"

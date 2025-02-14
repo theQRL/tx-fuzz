@@ -5,12 +5,12 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	txfuzz "github.com/rgeraldes24/tx-fuzz"
 	"github.com/theQRL/go-qrllib/dilithium"
 	"github.com/theQRL/go-zond/common"
 	"github.com/theQRL/go-zond/core/types"
 	"github.com/theQRL/go-zond/rpc"
 	"github.com/theQRL/go-zond/zondclient"
+	txfuzz "github.com/theQRL/tx-fuzz"
 )
 
 var (
@@ -78,7 +78,10 @@ func main() {
 func exec(data []byte) {
 	cl, acc := getRealBackend()
 	backend := zondclient.NewClient(cl)
-	sender := common.HexToAddress(txfuzz.ADDR)
+	sender, err := common.NewAddressFromString(txfuzz.ADDR)
+	if err != nil {
+		panic(err)
+	}
 	nonce, err := backend.PendingNonceAt(context.Background(), sender)
 	if err != nil {
 		panic(err)

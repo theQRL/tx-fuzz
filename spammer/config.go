@@ -8,12 +8,12 @@ import (
 	"math/rand"
 	"os"
 
-	txfuzz "github.com/rgeraldes24/tx-fuzz"
-	"github.com/rgeraldes24/tx-fuzz/flags"
-	"github.com/rgeraldes24/tx-fuzz/mutator"
 	"github.com/theQRL/go-qrllib/dilithium"
 	"github.com/theQRL/go-zond/rpc"
 	"github.com/theQRL/go-zond/zondclient"
+	txfuzz "github.com/theQRL/tx-fuzz"
+	"github.com/theQRL/tx-fuzz/flags"
+	"github.com/theQRL/tx-fuzz/mutator"
 	"github.com/urfave/cli/v2"
 )
 

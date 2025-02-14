@@ -1,12 +1,12 @@
-module github.com/rgeraldes24/tx-fuzz
+module github.com/theQRL/tx-fuzz
 
 go 1.22
 
 toolchain go1.22.6
 
 require (
-	github.com/rgeraldes24/FuzzyVM v0.0.0-20240814164600-5f611699efbc
-	github.com/rgeraldes24/goevmlab v0.0.0-20240814164028-e72145bd7218
+	github.com/rgeraldes24/goevmlab v0.0.0-20241118075001-b9908d7d2e54
+	github.com/theQRL/FuzzyVM v0.0.0-20240814164600-5f611699efbc
 	github.com/theQRL/go-qrllib v0.0.0-20230406170304-b7eb19c367e1
 	github.com/theQRL/go-zond v0.1.1
 	github.com/urfave/cli/v2 v2.27.1
@@ -81,4 +81,6 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/theQRL/go-zond => github.com/rgeraldes24/go-zond v0.0.0-20241227130350-b68064cef7bc
+replace github.com/theQRL/go-zond => github.com/cyyber/go-zond v0.0.0-20250214075702-77cdaeb7187f
+
+replace github.com/theQRL/FuzzyVM => github.com/cyyber/FuzzyVM v0.0.0-20250214090124-ae9bcaa68e8b
