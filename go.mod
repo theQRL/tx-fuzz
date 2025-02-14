@@ -5,10 +5,10 @@ go 1.22
 toolchain go1.22.6
 
 require (
-	github.com/theQRL/FuzzyVM v0.0.0-20250214111225-f5e5bf1c98a2
+	github.com/theQRL/FuzzyVM v0.0.0-20250214181305-992e8723ac88
 	github.com/theQRL/go-qrllib v0.0.0-20230406170304-b7eb19c367e1
 	github.com/theQRL/go-zond v0.1.1
-	github.com/theQRL/gozvmlab v0.0.0-20250214110241-752b2391ad8a
+	github.com/theQRL/gozvmlab v0.0.0-20250214180526-fa0574ea7bf7
 	github.com/urfave/cli/v2 v2.27.1
 )
 
@@ -81,4 +81,4 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/theQRL/go-zond => github.com/theQRL/go-zond v0.0.0-20250214095728-e6d949e278be
+replace github.com/theQRL/go-zond => github.com/theQRL/go-zond v0.0.0-20250214175148-2939fb6f666c
